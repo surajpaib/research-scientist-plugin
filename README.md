@@ -8,12 +8,12 @@ An autonomous research assistant that helps you generate hypotheses, run experim
 
 ```bash
 # Clone to Claude Code plugins directory
-git clone https://github.com/YOUR_USERNAME/research-scientist.git ~/.claude/plugins/research-scientist
+git clone https://github.com/ibro45/research-scientist.git ~/.claude/plugins/research-scientist
 ```
 
 Or if you want to use a different name:
 ```bash
-git clone https://github.com/YOUR_USERNAME/research-scientist.git ~/.claude/plugins/YOUR_PLUGIN_NAME
+git clone https://github.com/ibro45/research-scientist.git ~/.claude/plugins/YOUR_PLUGIN_NAME
 ```
 
 ### Step 2: Install Dependencies
