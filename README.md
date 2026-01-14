@@ -4,7 +4,18 @@ An autonomous research assistant that helps you generate hypotheses, run experim
 
 ## Installation
 
-> **TODO:** Installation method under development.
+This is a private repository, so the standard `/plugin install` method won't work. Use the `--plugin-dir` flag instead:
+
+```bash
+# 1. Clone (requires repo access)
+git clone git@github.com:ibro45/research-scientist.git ~/.claude/plugins/research-scientist
+
+# 2. Install dependencies
+~/.claude/plugins/research-scientist/scripts/install.sh
+
+# 3. Run Claude Code with the plugin
+claude --plugin-dir ~/.claude/plugins/research-scientist
+```
 
 ## Quick Start
 
