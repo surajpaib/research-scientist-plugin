@@ -4,80 +4,11 @@ An autonomous research assistant that helps you generate hypotheses, run experim
 
 ## Installation
 
-### Quick Install (One Command)
-
-```bash
-git clone git@github.com:ibro45/research-scientist.git ~/.claude/plugins/research-scientist && \
-  ~/.claude/plugins/research-scientist/setup.sh && \
-  ~/.claude/plugins/research-scientist/scripts/install.sh
-```
-
-Then restart Claude Code and verify:
-```
-/research-scientist:test
-```
-
-### What the Install Does
-
-1. **setup.sh** - Registers the plugin in `~/.claude/settings.json`
-2. **install.sh** - Installs dependencies (npm packages, Python packages)
-
-### Manual Installation
-
-If you prefer step-by-step:
-
-```bash
-# 1. Clone
-git clone git@github.com:ibro45/research-scientist.git ~/.claude/plugins/research-scientist
-
-# 2. Register plugin
-~/.claude/plugins/research-scientist/setup.sh
-
-# 3. Install dependencies
-~/.claude/plugins/research-scientist/scripts/install.sh
-
-# 4. Restart Claude Code
-```
-
-### Optional: Configure API Keys
-
-For higher rate limits on literature searches:
-
-```bash
-cp ~/.claude/plugins/research-scientist/.env.template ~/.claude/plugins/research-scientist/.env
-nano ~/.claude/plugins/research-scientist/.env
-```
-
-See [docs/api-keys.md](docs/api-keys.md) for details.
-
-### Updating
-
-```bash
-cd ~/.claude/plugins/research-scientist && git pull && ./scripts/install.sh
-```
-
-### Uninstalling
-
-```bash
-rm -rf ~/.claude/plugins/research-scientist
-```
-
-Then remove the `pluginDirectories` and `enabledPlugins` entries from `~/.claude/settings.json`.
-
-## Requirements
-
-- **Node.js** v18+ (for MCP servers)
-- **Python** 3.9+ (for analysis scripts)
-- **Pandoc** 3.0+ (for document building)
-
-Install on macOS:
-```bash
-brew install node python pandoc
-```
+> **TODO:** Installation method under development.
 
 ## Quick Start
 
-After installation:
+Once installed:
 
 1. **Create a new research project:**
    ```
