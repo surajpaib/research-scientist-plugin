@@ -4,78 +4,97 @@ An autonomous research assistant that helps you generate hypotheses, run experim
 
 ## Installation
 
-### Step 1: Clone the Plugin
+### Method 1: Settings Configuration (Recommended)
 
-```bash
-# Clone to Claude Code plugins directory
-git clone https://github.com/ibro45/research-scientist.git ~/.claude/plugins/research-scientist
-```
-
-Or if you want to use a different name:
-```bash
-git clone https://github.com/ibro45/research-scientist.git ~/.claude/plugins/YOUR_PLUGIN_NAME
-```
-
-### Step 2: Install Dependencies
-
-```bash
-# Run the install script
-~/.claude/plugins/research-scientist/scripts/install.sh
-```
-
-This script:
-- Checks system dependencies (Node.js, Python, Pandoc)
-- Installs MCP server npm dependencies
-- Installs Python packages (pyyaml, python-docx)
-- Runs the test suite to verify installation
-
-**Options:**
-- `--verbose` - Show detailed output
-- `--skip-test` - Skip running test suite
-
-### Step 3: Configure MCP Servers (Optional)
-
-To enable PubMed and Zotero API tools, add to your `~/.claude/settings.json`:
+Add the following to your `~/.claude/settings.json`:
 
 ```json
 {
-  "mcpServers": {
-    "pubmed": {
-      "command": "node",
-      "args": ["~/.claude/plugins/research-scientist/mcp-servers/pubmed-server/index.js"]
-    },
-    "zotero": {
-      "command": "node",
-      "args": ["~/.claude/plugins/research-scientist/mcp-servers/zotero-server/index.js"]
+  "extraKnownMarketplaces": {
+    "research-scientist": {
+      "source": {
+        "source": "github",
+        "repo": "ibro45/research-scientist"
+      }
     }
+  },
+  "enabledPlugins": {
+    "research-scientist@research-scientist": true
   }
 }
 ```
 
-### Step 4: Configure API Keys (Optional)
+Then **restart Claude Code** to load the plugin.
+
+### Method 2: Plugin Commands
+
+In Claude Code:
+
+```
+/plugin marketplace add ibro45/research-scientist
+/plugin install research-scientist@ibro45/research-scientist
+```
+
+Then restart Claude Code.
+
+### Method 3: Development Installation
+
+For modifying the plugin locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/ibro45/research-scientist.git ~/.claude/plugins/research-scientist
+
+# Install dependencies
+~/.claude/plugins/research-scientist/scripts/install.sh
+```
+
+Then add to `~/.claude/settings.json`:
+
+```json
+{
+  "pluginDirectories": ["~/.claude/plugins/research-scientist"],
+  "enabledPlugins": {
+    "research-scientist": true
+  }
+}
+```
+
+Restart Claude Code.
+
+### Post-Installation: Install Dependencies
+
+After enabling the plugin, run the install script to set up MCP servers and Python packages:
+
+```bash
+~/.claude/plugins/research-scientist/scripts/install.sh
+```
+
+This installs:
+- MCP server npm dependencies (PubMed, Zotero)
+- Python packages (pyyaml, python-docx)
+
+### Optional: Configure API Keys
 
 For higher rate limits on literature searches:
 
 ```bash
-# Copy template
 cp ~/.claude/plugins/research-scientist/.env.template ~/.claude/plugins/research-scientist/.env
-
-# Edit with your keys
 nano ~/.claude/plugins/research-scientist/.env
 ```
 
-See [docs/api-keys.md](docs/api-keys.md) for how to obtain API keys.
+See [docs/api-keys.md](docs/api-keys.md) for details.
 
-### Step 5: Verify Installation
+### Verify Installation
 
-```bash
-# Run test suite
-python3 ~/.claude/plugins/research-scientist/tests/test_setup.py --verbose
-```
-
-Or in Claude Code:
+In Claude Code:
 ```
 /research-scientist:test
+```
+
+Or from terminal:
+```bash
+python3 ~/.claude/plugins/research-scientist/tests/test_setup.py --verbose
 ```
 
 ## Requirements
