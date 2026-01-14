@@ -10,6 +10,7 @@ PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 
 echo "Setting up Research Scientist plugin..."
+echo "Plugin directory: $PLUGIN_DIR"
 
 # Create .claude directory if needed
 mkdir -p "$HOME/.claude"
@@ -18,27 +19,39 @@ mkdir -p "$HOME/.claude"
 if [ -f "$SETTINGS_FILE" ]; then
     # Check if python3 is available for JSON manipulation
     if command -v python3 &> /dev/null; then
-        python3 << EOF
+        python3 - "$PLUGIN_DIR" "$SETTINGS_FILE" << 'PYEOF'
 import json
+import sys
 from pathlib import Path
 
-settings_file = Path("$SETTINGS_FILE")
+plugin_dir = sys.argv[1]
+settings_file = Path(sys.argv[2])
+
 settings = json.loads(settings_file.read_text())
 
 # Add pluginDirectories
 dirs = settings.get("pluginDirectories", [])
-if "$PLUGIN_DIR" not in dirs:
-    dirs.append("$PLUGIN_DIR")
+if plugin_dir not in dirs:
+    dirs.append(plugin_dir)
 settings["pluginDirectories"] = dirs
 
-# Add enabledPlugins
+# Remove old marketplace-based entries if present
+if "extraKnownMarketplaces" in settings:
+    if "research-scientist" in settings["extraKnownMarketplaces"]:
+        del settings["extraKnownMarketplaces"]["research-scientist"]
+    if not settings["extraKnownMarketplaces"]:
+        del settings["extraKnownMarketplaces"]
+
+# Update enabledPlugins - remove marketplace version, add local version
 plugins = settings.get("enabledPlugins", {})
+plugins.pop("research-scientist@research-scientist", None)
+plugins.pop("research-scientist@bro-local", None)
 plugins["research-scientist"] = True
 settings["enabledPlugins"] = plugins
 
-settings_file.write_text(json.dumps(settings, indent=2))
-print("Updated $SETTINGS_FILE")
-EOF
+settings_file.write_text(json.dumps(settings, indent=2) + "\n")
+print(f"Updated {settings_file}")
+PYEOF
     else
         echo "Python3 not found. Please manually add to $SETTINGS_FILE:"
         echo '  "pluginDirectories": ["'"$PLUGIN_DIR"'"],'
