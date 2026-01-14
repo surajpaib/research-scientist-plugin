@@ -1,0 +1,103 @@
+---
+title: "Technical Overview: {{PROJECT_TITLE}}"
+date: "{{DATE}}"
+---
+
+# Technical Overview
+
+**Project:** {{PROJECT_TITLE}}
+**Date:** {{DATE}}
+**Status:** In Progress
+
+---
+
+## Executive Summary
+
+[2-3 sentence summary of the project and current state]
+
+---
+
+## Key Results
+
+### Primary Finding
+
+[Main result with statistics]
+
+### Performance Metrics
+
+| Metric | Value | 95% CI |
+|--------|-------|--------|
+| | | |
+
+### Comparison to Baseline
+
+| Model | Metric | Value |
+|-------|--------|-------|
+| Ours | | |
+| Baseline | | |
+
+---
+
+## Methods Summary
+
+### Data
+- **N**: {{SAMPLE_SIZE}}
+- **Source**: {{DATA_PATH}}
+- **Events**: [number] ([percentage]%)
+
+### Analysis
+- **Primary model**:
+- **Validation**:
+- **Software**: Python 3.11
+
+---
+
+## Key Figures
+
+### Figure 1: [Title]
+
+![](figures/figure1.pdf){width=100%}
+
+### Figure 2: [Title]
+
+![](figures/figure2.pdf){width=100%}
+
+---
+
+## Statistical Details
+
+| Analysis | Method | Result | P-value |
+|----------|--------|--------|---------|
+| | | | |
+
+---
+
+## Sensitivity Analyses
+
+| Analysis | Result | Interpretation |
+|----------|--------|----------------|
+| | | |
+
+---
+
+## Outstanding Questions
+
+1. [ ]
+2. [ ]
+
+---
+
+## Next Steps
+
+1. [ ]
+2. [ ]
+
+---
+
+## Files
+
+| Document | Path | Status |
+|----------|------|--------|
+| Paper draft | `paper/paper.md` | Draft |
+| Supplement | `paper/supplement.md` | Draft |
+| Results | `results/` | Generated |

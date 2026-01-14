@@ -1,0 +1,166 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working with this research project.
+
+## Project Overview
+
+**{{PROJECT_TITLE}}**
+
+{{DESCRIPTION}}
+
+- **Sample size**: ~{{SAMPLE_SIZE}} subjects
+- **Primary outcome**: {{OUTCOME_VAR}}
+- **Target journal**: {{TARGET_JOURNAL}}
+
+---
+
+## Data Locations
+
+### Raw Data
+- **Data path**: `{{DATA_PATH}}`
+- **Clinical data**: `{{CLINICAL_DATA_PATH}}`
+
+### Processed Data
+- **Features**: `features/{{FEATURES_FILE}}`
+- **Results**: `results/`
+
+---
+
+## Important: Use the Vault as Memory
+
+The `vault/` directory is an Obsidian knowledge base that serves as **persistent memory** across sessions:
+
+- **Check existing notes** in vault before starting work
+- **Write results** to `vault/Experiments/` after running analyses
+- **Document decisions** in `vault/Reference/Statistical Decisions.md`
+- **Update `[[Home]]`** when adding significant findings
+- **Review `[[Literature Index]]`** before adding new citations
+
+---
+
+## Important: Log All Work
+
+**Always append to `vault/Logs/Session Log.md`** after completing significant actions.
+
+Log format:
+```markdown
+### YYYY-MM-DD HH:MM - Brief Title
+
+**Action:** What was done
+**Files changed:** List of files modified/created
+**Results:** Key outcomes or metrics
+**Notes:** Additional context
+
+---
+```
+
+---
+
+## Nested CLAUDE.md Files
+
+Read these domain-specific CLAUDE.md files when working in those areas:
+
+- **`vault/CLAUDE.md`** - Obsidian conventions (wikilinks, frontmatter, archiving)
+- **`paper/CLAUDE.md`** - Academic writing workflow (citations, building)
+
+---
+
+## Slash Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/research-scientist:search-literature` | Search academic databases |
+| `/research-scientist:add-citation` | Add citation from DOI |
+| `/research-scientist:read-paper` | Convert PDF to vault note |
+| `/research-scientist:new-experiment` | Create new experiment |
+| `/research-scientist:run-analysis` | Execute analysis pipeline |
+| `/research-scientist:generate-figures` | Create publication figures |
+| `/research-scientist:build-paper` | Build Word/PDF documents |
+| `/research-scientist:paper-overview` | Technical overview for PI |
+| `/research-scientist:verify-stats` | Cross-check paper vs results |
+| `/research-scientist:peer-review` | AI peer review |
+| `/research-scientist:code-audit` | Validate reproducibility |
+| `/research-scientist:update-log` | Add session log entry |
+
+---
+
+## Literature Workflow
+
+Three commands for managing citations and literature:
+
+| Task | Command | Example |
+|------|---------|---------|
+| Find papers | `/research-scientist:search-literature` | `search-literature adipose mortality` |
+| Add from DOI | `/research-scientist:add-citation` | `add-citation 10.1016/j.jacc.2023.01.001` |
+| Read PDF | `/research-scientist:read-paper` | `read-paper ~/Downloads/paper.pdf` |
+
+**Workflow for adding a new reference:**
+1. Search: `/research-scientist:search-literature [topic]` → find relevant papers
+2. Add: `/research-scientist:add-citation [DOI]` → generates BibTeX
+3. Cite: Use `[@citationkey]` in paper.md
+
+---
+
+## Architecture
+
+### Directory Structure
+```
+{{PROJECT_NAME}}/
+├── vault/               # Obsidian knowledge base
+├── paper/               # Academic manuscript
+├── experiments/         # Experiment configs
+├── results/             # Analysis outputs
+│   └── figures/
+├── features/            # Pre-extracted features
+└── .claude/             # Claude Code config
+```
+
+### Data Flow
+```
+Raw Data → Scripts → Aggregated Results → Vault Notes → Paper
+```
+
+---
+
+## Key Variables
+
+### Outcomes
+- `{{OUTCOME_VAR}}` - Primary outcome
+
+### Features
+(Document key variables here after feature extraction)
+
+---
+
+## Key Patterns
+
+### Reproducibility
+- All configs use `seed: 42`
+- Config hash stored with results
+- Experiments documented in vault
+
+### Cross-Validation
+Use appropriate CV strategy:
+- K-fold for standard evaluation
+- Stratified for imbalanced outcomes
+- Nested for hyperparameter tuning
+
+---
+
+## Common Commands
+
+### Analysis Pipeline
+```bash
+# Run main analysis
+python -m scripts.analysis --config experiments/configs/EXP-001.yaml
+
+# Generate figures
+python -m scripts.figures --output results/figures/
+```
+
+### Paper Building
+```bash
+cd paper && make docx      # Main paper
+cd paper && make supplement # Supplementary material
+cd paper && make overview   # PI overview
+```

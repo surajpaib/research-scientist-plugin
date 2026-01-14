@@ -1,0 +1,77 @@
+---
+aliases: [Methods Decisions, Analysis Plan]
+tags: [reference, methods, {{PROJECT_TAG}}]
+created: {{DATE}}
+status: active
+---
+
+# Statistical Decisions
+
+Documentation of all methodology choices with rationale.
+
+## Study Design
+
+| Aspect | Decision | Rationale |
+|--------|----------|-----------|
+| Design | | |
+| Population | | |
+| Exposure | | |
+| Outcome | | |
+
+## Sample Size
+
+- **Target N**: {{SAMPLE_SIZE}}
+- **Power calculation**:
+- **Expected events**:
+
+## Primary Analysis
+
+### Model Selection
+- **Model**:
+- **Rationale**:
+
+### Variable Selection
+- **Covariates**:
+- **Selection method**:
+
+### Handling Confounders
+-
+
+## Missing Data
+
+| Strategy | Variables | Justification |
+|----------|-----------|---------------|
+| Complete case | | |
+| Multiple imputation | | |
+| Last observation | | |
+
+## Cross-Validation
+
+- **Strategy**:
+- **Folds**:
+- **Stratification**:
+
+## Multiple Testing
+
+- **Number of tests**:
+- **Correction method**:
+- **Adjusted alpha**:
+
+## Sensitivity Analyses
+
+| Analysis | Purpose | Status |
+|----------|---------|--------|
+| | | |
+
+## Decision Log
+
+### {{DATE}} - Initial Setup
+- Established primary analysis framework
+- Defined outcome and exposure variables
+
+---
+
+## Related Notes
+
+- [[Home]]
+- [[Data Dictionary]]

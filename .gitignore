@@ -1,0 +1,29 @@
+# Environment and secrets
+.env
+*.env.local
+
+# Node modules (users install locally)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Test output
+.coverage
+htmlcov/

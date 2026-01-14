@@ -1,0 +1,67 @@
+---
+aliases: [Variables, Codebook]
+tags: [reference, {{PROJECT_TAG}}]
+created: {{DATE}}
+status: active
+---
+
+# Data Dictionary
+
+Variable definitions and metadata for all datasets.
+
+## Identifiers
+
+| Variable | Type | Description | Source |
+|----------|------|-------------|--------|
+| `subject_id` | string | Unique subject identifier | |
+
+## Primary Outcome
+
+| Variable | Type | Description | Values |
+|----------|------|-------------|--------|
+| `{{OUTCOME_VAR}}` | | Primary outcome | |
+
+## Primary Exposure
+
+| Variable | Type | Description | Units |
+|----------|------|-------------|-------|
+| | | | |
+
+## Covariates
+
+### Demographics
+
+| Variable | Type | Description | Values/Range |
+|----------|------|-------------|--------------|
+| `age` | continuous | Age at baseline | years |
+| `sex` | binary | Sex | 0=F, 1=M |
+
+### Clinical
+
+| Variable | Type | Description | Values/Range |
+|----------|------|-------------|--------------|
+| | | | |
+
+## Derived Variables
+
+| Variable | Formula | Description |
+|----------|---------|-------------|
+| | | |
+
+## Missing Data
+
+| Variable | N Missing | % Missing | Handling |
+|----------|-----------|-----------|----------|
+| | | | |
+
+## Data Sources
+
+| Source | Path | Last Updated |
+|--------|------|--------------|
+| Raw data | `{{DATA_PATH}}` | |
+| Features | `features/{{FEATURES_FILE}}` | |
+
+## Related Notes
+
+- [[Home]]
+- [[Statistical Decisions]]

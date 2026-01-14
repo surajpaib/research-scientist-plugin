@@ -1,0 +1,88 @@
+---
+aliases: [Dashboard, Index]
+tags: [home, {{PROJECT_TAG}}]
+created: {{DATE}}
+status: active
+---
+
+# {{PROJECT_TITLE}}
+
+> {{DESCRIPTION}}
+
+## Quick Links
+
+| Document | Purpose |
+|----------|---------|
+| [[Data Dictionary]] | Variable definitions |
+| [[Statistical Decisions]] | Methodology choices |
+| [[Literature Index]] | Bibliography |
+| [[Figure Manifest]] | Figure tracking |
+
+## Current Status
+
+| Aspect | Status |
+|--------|--------|
+| Phase | 🔬 Data Collection |
+| Data | ⏳ In Progress |
+| Analysis | ⏳ Pending |
+| Paper | ⏳ Pending |
+
+**Phase Legend:**
+- 🔬 Data Collection
+- 📊 Analysis
+- ✍️ Writing
+- 📝 Review
+- ✅ Complete
+
+## Key Metrics
+
+| Metric | Value |
+|--------|-------|
+| Sample size | {{SAMPLE_SIZE}} |
+| Events | - |
+| Event rate | - |
+| C-statistic | - |
+
+## Current Plan
+
+### This Week
+- [ ] Complete data preparation
+- [ ] Run initial analysis
+- [ ] Literature review
+
+### Backlog
+- [ ] Sensitivity analyses
+- [ ] Paper draft
+- [ ] Internal review
+
+## Recent Experiments
+
+| ID | Description | Status | Key Finding |
+|----|-------------|--------|-------------|
+| - | - | - | - |
+
+## Literature Highlights
+
+| Citation | Key Finding |
+|----------|-------------|
+| - | - |
+
+## File Locations
+
+| Data | Path |
+|------|------|
+| Raw data | `{{DATA_PATH}}` |
+| Features | `features/{{FEATURES_FILE}}` |
+| Results | `results/` |
+
+## Session History
+
+| Date | Milestone |
+|------|-----------|
+| {{DATE}} | Project initialized |
+
+## Related Notes
+
+- [[Session Log]]
+- [[Statistical Decisions]]
+- [[Literature Index]]

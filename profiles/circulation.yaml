@@ -1,0 +1,84 @@
+# Circulation Profile
+# https://www.ahajournals.org/journal/circ
+
+journal:
+  name: "Circulation"
+  abbreviation: "Circulation"
+  publisher: "American Heart Association"
+  impact_factor: 37.8
+  scope: "cardiovascular medicine"
+
+manuscript:
+  word_limit:
+    original_research: 5000
+    research_letter: 1500
+    review: 6000
+
+  abstract:
+    type: structured
+    word_limit: 250
+    sections:
+      - Background
+      - Methods
+      - Results
+      - Conclusions
+
+  sections:
+    required:
+      - Introduction
+      - Methods
+      - Results
+      - Discussion
+    recommended:
+      - Clinical Perspective (What Is New / Clinical Implications)
+
+  figures:
+    max_count: 7
+    formats: [pdf, tiff, eps, png]
+    min_dpi: 300
+    color: "free online, fee for print"
+
+  tables:
+    max_count: 5
+    format: "Word table or Excel"
+
+  references:
+    max_count: 60
+    style: "Vancouver (superscript)"
+    doi_required: true
+
+formatting:
+  reference_style: vancouver
+  csl_file: "circulation.csl"
+
+  statistics:
+    p_value_format: "P=0.001"  # no space around equals
+    ci_format: "95% CI: lower-upper"
+    effect_size_format: "HR, 2.3; 95% CI: 1.5-3.4"
+
+  clinical_perspective:
+    required: true
+    format: |
+      **What Is New?**
+      - Bullet point 1
+      - Bullet point 2
+
+      **What Are the Clinical Implications?**
+      - Bullet point 1
+      - Bullet point 2
+
+submission:
+  system: "Manuscript Central"
+  cover_letter: required
+
+  required_statements:
+    - "IRB approval or exemption"
+    - "Informed consent"
+    - "Funding disclosure"
+    - "Conflict of interest"
+    - "Data availability"
+    - "ARRIVE guidelines (if animal study)"
+
+review:
+  type: "single-blind"
+  typical_time: "3-4 weeks"

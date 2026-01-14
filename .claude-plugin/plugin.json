@@ -1,0 +1,19 @@
+{
+  "name": "research-scientist",
+  "description": "AI Research Scientist - Autonomous hypothesis generation, experimentation, and publication. Inspired by AI Scientist v2, Google Co-Scientist, and Kosmos.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ibrahim Hadzic"
+  },
+  "keywords": [
+    "research",
+    "science",
+    "academic",
+    "paper-writing",
+    "experiments",
+    "reproducibility",
+    "literature-search",
+    "hypothesis-generation"
+  ],
+  "repository": "https://github.com/username/claude-research-scientist"
+}

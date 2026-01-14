@@ -1,0 +1,88 @@
+# Radiology Profile
+# https://pubs.rsna.org/journal/radiology
+
+journal:
+  name: "Radiology"
+  abbreviation: "Radiology"
+  publisher: "Radiological Society of North America (RSNA)"
+  impact_factor: 19.7
+  scope: "diagnostic and interventional radiology"
+
+manuscript:
+  word_limit:
+    original_research: 3500
+    technical_developments: 3000
+    reviews: 5000
+
+  abstract:
+    type: structured
+    word_limit: 300
+    sections:
+      - Background
+      - Purpose
+      - Materials and Methods
+      - Results
+      - Conclusion
+
+  sections:
+    required:
+      - Introduction
+      - Materials and Methods
+      - Results
+      - Discussion
+    recommended:
+      - Summary Statement (1 sentence)
+      - Key Results (3 bullet points)
+
+  figures:
+    max_count: 8
+    formats: [tiff, eps, pdf]
+    min_dpi: 300
+    max_file_size: "10 MB per figure"
+    color: "free"
+
+  tables:
+    max_count: 6
+    format: "Word table"
+
+  references:
+    max_count: 50
+    style: "Vancouver (superscript)"
+    doi_required: preferred
+
+formatting:
+  reference_style: vancouver
+  csl_file: "radiology.csl"
+
+  statistics:
+    p_value_format: "P < .001"  # leading zero omitted for P
+    ci_format: "95% CI: lower, upper"
+    effect_size_format: "hazard ratio, 2.3 [95% CI: 1.5, 3.4]"
+
+  special_requirements:
+    - "Report exact P values (not P < .05)"
+    - "Include 95% CIs for all effect estimates"
+    - "Report sensitivity/specificity with CIs"
+    - "Follow STARD for diagnostic studies"
+    - "Follow STROBE for observational studies"
+
+submission:
+  system: "ScholarOne"
+  cover_letter: required
+
+  required_statements:
+    - "IRB approval with protocol number"
+    - "Written informed consent"
+    - "Funding sources"
+    - "Conflicts of interest"
+    - "Data sharing statement"
+
+  checklist_required:
+    diagnostic: "STARD"
+    observational: "STROBE"
+    rct: "CONSORT"
+    systematic_review: "PRISMA"
+
+review:
+  type: "double-blind"
+  typical_time: "4-6 weeks"

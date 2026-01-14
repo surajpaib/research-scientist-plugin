@@ -1,0 +1,91 @@
+# JACC: Cardiovascular Imaging Profile
+# https://www.jacc.org/journal/imaging
+
+journal:
+  name: "JACC: Cardiovascular Imaging"
+  abbreviation: "JACC Cardiovasc Imaging"
+  publisher: "Elsevier / American College of Cardiology"
+  impact_factor: 14.0
+  scope: "cardiovascular imaging"
+
+manuscript:
+  word_limit:
+    original_research: 4500
+    brief_report: 2500
+    state_of_the_art: 6000
+    editorial: 1500
+
+  abstract:
+    type: structured
+    word_limit: 250
+    sections:
+      - Background
+      - Objectives
+      - Methods
+      - Results
+      - Conclusions
+
+  sections:
+    required:
+      - Introduction
+      - Methods
+      - Results
+      - Discussion
+    optional:
+      - Perspectives (Competency/Translational)
+
+  figures:
+    max_count: 6
+    central_illustration: required
+    formats: [pdf, tiff, eps]
+    min_dpi: 300
+    color: "free"
+
+  tables:
+    max_count: 4
+    format: "editable (not images)"
+
+  references:
+    max_count: 50
+    style: "Vancouver (numbered)"
+    doi_required: true
+
+formatting:
+  reference_style: vancouver
+  csl_file: "vancouver-superscript.csl"
+
+  statistics:
+    p_value_format: "P = 0.001 or P < 0.001"
+    ci_format: "95% CI, lower-upper"
+    effect_size_format: "HR 2.3 (95% CI, 1.5-3.4; P = 0.001)"
+
+  abbreviations:
+    define_in_abstract: true
+    define_in_body: true
+    common_allowed:
+      - CI
+      - HR
+      - OR
+      - AUC
+      - CT
+      - MRI
+      - LV
+      - RV
+
+submission:
+  system: "Editorial Manager"
+  cover_letter: required
+  highlights: required  # 3-5 bullet points
+  graphical_abstract: optional
+
+  required_statements:
+    - "Institutional Review Board approval"
+    - "Informed consent (or waiver)"
+    - "Funding sources"
+    - "Author contributions (CRediT)"
+    - "Conflicts of interest"
+    - "Data availability"
+
+review:
+  type: "single-blind"
+  typical_time: "4-6 weeks"

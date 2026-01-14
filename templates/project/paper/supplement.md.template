@@ -1,0 +1,59 @@
+---
+title: "Supplementary Material: {{PROJECT_TITLE}}"
+date: "{{DATE}}"
+---
+
+# Supplementary Methods
+
+## Extended Methods Description
+
+[Detailed methodology not included in main paper]
+
+## Data Processing
+
+[Data cleaning, feature extraction, preprocessing steps]
+
+## Model Details
+
+[Detailed model specifications, hyperparameters]
+
+# Supplementary Results
+
+## Table S1. Extended Baseline Characteristics
+
+| Characteristic | Overall (N=) |
+|----------------|--------------|
+| | |
+
+## Table S2. [Title]
+
+| Variable | Value |
+|----------|-------|
+| | |
+
+## Figure S1. [Title]
+
+![Figure S1. Caption.](figures/figureS1.pdf){width=100%}
+
+## Figure S2. [Title]
+
+![Figure S2. Caption.](figures/figureS2.pdf){width=100%}
+
+## Sensitivity Analyses
+
+### Analysis S1: [Title]
+
+[Methods and results]
+
+### Analysis S2: [Title]
+
+[Methods and results]
+
+## Subgroup Analyses
+
+[Subgroup analysis results]
+
+# Supplementary References
+
+::: {#refs}
+:::
