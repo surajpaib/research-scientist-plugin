@@ -1,0 +1,89 @@
+# PHI Guard Configuration
+# =======================
+# Customize these patterns for your project's protected health information.
+# The PHI Guard hook reads this file to determine which paths to block.
+#
+# Pattern syntax: Shell glob patterns
+#   *     - matches any characters within a path segment
+#   **    - matches across directories
+#   ?     - matches single character
+#
+# Patterns are checked in order: allowed_patterns first, then phi_patterns.
+
+# =============================================================================
+# BLOCKED: Paths containing Protected Health Information
+# =============================================================================
+phi_patterns:
+  # Medical images (DICOM, NRRD, NIfTI)
+  - "*.nrrd"
+  - "*.dcm"
+  - "*.dicom"
+  - "*.nii"
+  - "*.nii.gz"
+
+  # Raw clinical data files
+  - "*clinical*.csv"
+  - "*patient*.csv"
+  - "*subject*.csv"
+  - "*mrn*"
+  - "*MRN*"
+
+  # Common PHI directory patterns
+  - "/Volumes/*/Segmentations*"
+  - "*/raw_data/*"
+  - "*/patient_data/*"
+  - "*/clinical_data/*"
+
+  # Credentials and secrets
+  - "*credentials*"
+  - "*secrets*"
+  - "*.pem"
+  - "*.key"
+
+# =============================================================================
+# ALLOWED: Safe paths (exceptions to PHI patterns)
+# =============================================================================
+allowed_patterns:
+  # Aggregated results (de-identified)
+  - "results/*"
+  - "*/results/*"
+
+  # Publication outputs
+  - "paper/*"
+  - "*/paper/*"
+
+  # Vault/documentation
+  - "vault/*"
+  - "*/vault/*"
+
+  # Pre-extracted features (should be de-identified)
+  - "features/*.npz"
+  - "features/*.csv"
+  - "features/*.parquet"
+
+  # Code files (always safe)
+  - "*.py"
+  - "*.md"
+  - "*.yaml"
+  - "*.yml"
+  - "*.sh"
+  - "*.js"
+  - "*.ts"
+  - "*.json"
+  - "*.r"
+  - "*.R"
+  - "*.ipynb"
+
+# =============================================================================
+# PROJECT-SPECIFIC: Add your custom patterns here
+# =============================================================================
+# These are merged with the defaults above.
+
+project_phi_patterns:
+  # Example: Add paths specific to your study
+  # - "/Volumes/MyDrive/MyStudy_Segmentations"
+  # - "*MyStudy_clinical*.csv"
+
+project_allowed_patterns:
+  # Example: Add safe paths specific to your project
+  # - "my_aggregated_data/*.csv"

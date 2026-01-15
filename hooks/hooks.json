@@ -5,7 +5,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "${CLAUDE_PLUGIN_ROOT}/scripts/phi_guard.sh \"$TOOL_INPUT\"",
+          "command": "~/.claude/plugins/research-scientist/scripts/phi_guard.sh \"$TOOL_INPUT\"",
           "timeout": 3000,
           "onFailure": "block",
           "description": "PHI Guard: Blocks access to protected health information"
@@ -27,33 +27,13 @@
       "hooks": [
         {
           "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -q 'git commit'; then ${CLAUDE_PLUGIN_ROOT}/scripts/pre_commit_check.sh 2>/dev/null || echo '[Hook] Pre-commit checks found issues'; fi",
+          "command": "if echo \"$TOOL_INPUT\" | grep -q 'git commit'; then ~/.claude/plugins/research-scientist/scripts/pre_commit_check.sh 2>/dev/null || echo '[Hook] Pre-commit checks found issues'; fi",
           "timeout": 10000
-        }
-      ]
-    },
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -qE '\\.yaml|config'; then echo '[Hook] Config file detected - will validate reproducibility requirements'; fi",
-          "timeout": 5000
         }
       ]
     }
   ],
   "PostToolUse": [
-    {
-      "matcher": "Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -qE '\\.yaml$'; then python3 ${CLAUDE_PLUGIN_ROOT}/scripts/validate_config.py \"$FILE_PATH\" 2>/dev/null || true; fi",
-          "timeout": 5000
-        }
-      ]
-    },
     {
       "matcher": "Write",
       "hooks": [
@@ -69,18 +49,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -qE 'python.*analysis|run-analysis'; then echo '[Hook] Analysis complete - consider updating vault/Home.md and running --validate'; fi",
-          "timeout": 2000
-        }
-      ]
-    }
-  ],
-  "Notification": [
-    {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "echo '[Research Scientist] Task notification'",
+          "command": "if echo \"$TOOL_INPUT\" | grep -qE 'python.*analysis|run-analysis'; then echo '[Hook] Analysis complete - consider updating vault/Home.md'; fi",
           "timeout": 2000
         }
       ]

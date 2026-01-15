@@ -21,9 +21,10 @@ claude --plugin-dir ~/.claude/plugins/research-scientist
 
 Once installed:
 
-1. **Create a new research project:**
+1. **Initialize a research project** (new or existing):
    ```
-   /research-scientist:new-project my-research-project
+   cd my-project
+   /research-scientist:init
    ```
 
 2. **Search for literature:**
@@ -48,7 +49,7 @@ Once installed:
 - **Multi-Agent Architecture**: Specialized agents for literature search, experiments, analysis, writing, and review
 - **14 Auto-Invoked Skills**: Each with USE WHEN/DON'T USE WHEN guidance for reliable triggering
 - **MCP Integration**: PubMed and Zotero servers for reliable API access
-- **PHI Protection**: Programmatic hooks block access to protected health information
+- **PHI Protection**: Configurable hooks block access to protected health information
 - **Journal Profiles**: Pre-configured requirements for JACC, Circulation, Radiology, npj Digital Medicine
 - **Experiment Versioning**: Git-based branches with lineage tracking
 - **Figure Management**: Versioning, numbering, alt-text generation
@@ -62,7 +63,7 @@ Once installed:
 
 | Command | Purpose |
 |---------|---------|
-| `/research-scientist:new-project` | Initialize a new research project |
+| `/research-scientist:init` | Initialize plugin in current directory (new or existing project) |
 | `/research-scientist:new-experiment` | Create experiment with config |
 | `/research-scientist:run-analysis` | Execute analysis + figures + validation |
 | `/research-scientist:build-paper` | Build Word documents |
@@ -129,15 +130,20 @@ Pre-configured profiles in `profiles/`:
 
 Each includes word limits, abstract format, figure requirements, reference style, and required statements.
 
-## Project Structure Created
+## Project Structure
 
-When you run `/research-scientist:new-project`:
+When you run `/research-scientist:init`:
+
+**Existing project?** Adds missing infrastructure, preserves existing files.
+**Empty directory?** Creates full project structure:
 
 ```
 your-project/
 ├── CLAUDE.md                    # Project instructions
 ├── .mcp.json                    # MCP server config
-├── .github/workflows/           # CI/CD (optional)
+├── .claude/
+│   ├── hooks.json               # PHI Guard hooks
+│   └── phi_config.yaml          # Customizable PHI patterns
 ├── vault/                       # Obsidian knowledge base
 │   ├── Home.md                  # Dashboard
 │   ├── Experiments/             # Experiment notes
@@ -150,8 +156,7 @@ your-project/
 │   ├── references.bib           # Citations
 │   └── Makefile                 # Build automation
 ├── experiments/                 # Experiment configs
-├── results/                     # Analysis outputs
-└── .experiment/                 # Git versioning metadata
+└── results/                     # Analysis outputs
 ```
 
 ## Documentation
@@ -160,16 +165,36 @@ your-project/
 - [Collaboration Guide](docs/collaboration.md) - Multi-user workflows
 - [CI/CD Guide](docs/ci.md) - GitHub Actions setup
 
-## Validation Hooks
+## PHI Protection
 
-### PHI Protection
-The `phi_guard.sh` hook blocks access to:
-- Medical images (.nrrd, .dcm)
-- Patient-level clinical data
-- Segmentation directories
+The PHI Guard hook blocks access to protected health information. Patterns are configurable via `.claude/phi_config.yaml`:
+
+```yaml
+# Blocked patterns (PHI)
+phi_patterns:
+  - "*.nrrd"
+  - "*clinical*.csv"
+  - "/Volumes/*/Segmentations*"
+
+# Safe patterns (exceptions)
+allowed_patterns:
+  - "results/*"
+  - "paper/*"
+  - "*.py"
+
+# Project-specific overrides
+project_phi_patterns:
+  - "/path/to/your/study/data"
+```
+
+Default patterns block:
+- Medical images (.nrrd, .dcm, .dicom, .nii)
+- Patient-level clinical data (*clinical*.csv, *patient*.csv)
+- Common PHI directories (/Volumes/*/Segmentations*)
 - Credentials and secrets
 
-### Quality Hooks
+## Quality Hooks
+
 Pre-commit and post-write hooks validate:
 - YAML config reproducibility requirements
 - Hardcoded paths in Python files
