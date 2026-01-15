@@ -22,5 +22,18 @@
         }
       ]
     }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "~/.claude/plugins/research-scientist/scripts/validate_output.sh \"$TOOL_INPUT\"",
+          "timeout": 5000,
+          "description": "PHI Validation: Scans newly written files for potential PHI leakage"
+        }
+      ]
+    }
   ]
 }

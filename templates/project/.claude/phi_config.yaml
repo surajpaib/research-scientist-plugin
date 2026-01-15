@@ -87,3 +87,44 @@ project_phi_patterns:
 project_allowed_patterns:
   # Example: Add safe paths specific to your project
   # - "my_aggregated_data/*.csv"
+
+# =============================================================================
+# CONTENT SCANNING: PHI column detection in CSV files
+# =============================================================================
+# Even if a file passes path checks, its contents can be scanned for PHI.
+# This catches cases where PHI data is saved to "safe" directories.
+
+content_scanning:
+  # Enable or disable content scanning (default: true)
+  enabled: true
+
+  # PHI column names to detect in CSV headers (case-insensitive)
+  # If any of these appear as a column name, the file is blocked
+  csv_phi_columns:
+    # Direct identifiers
+    - mrn
+    - empi
+    - ssn
+    - patient_id
+    - medical_record
+    - social_security
+
+    # Date identifiers
+    - dob
+    - dod
+    - date_of_birth
+    - date_of_death
+
+    # Access/record identifiers
+    - accession
+    - accessionnumber
+
+    # Contact information
+    - address
+    - phone
+    - email
+
+    # Other identifiers
+    - name
+    - first_name
+    - last_name

@@ -128,12 +128,114 @@ if [ ${#ALLOWED_PATTERNS[@]} -eq 0 ]; then
 fi
 
 # =============================================================================
+# Default PHI column patterns for content scanning
+# =============================================================================
+DEFAULT_PHI_COLUMNS=(
+    "mrn"
+    "empi"
+    "dob"
+    "dod"
+    "ssn"
+    "date_of_birth"
+    "date_of_death"
+    "accession"
+    "medical_record"
+    "patient_id"
+    "social_security"
+)
+
+# Load content scanning config
+CONTENT_SCANNING_ENABLED="true"
+PHI_COLUMNS=()
+
+if [ -f "$CONFIG_FILE" ]; then
+    # Check if content scanning is enabled
+    if grep -q "content_scanning:" "$CONFIG_FILE"; then
+        enabled=$(awk '/content_scanning:/{found=1} found && /enabled:/{print $2; exit}' "$CONFIG_FILE")
+        if [ "$enabled" = "false" ]; then
+            CONTENT_SCANNING_ENABLED="false"
+        fi
+    fi
+
+    # Load PHI column patterns
+    while IFS= read -r col; do
+        [ -n "$col" ] && PHI_COLUMNS+=("$col")
+    done < <(parse_yaml_list "$CONFIG_FILE" "csv_phi_columns")
+fi
+
+# Fall back to defaults if no columns loaded
+if [ ${#PHI_COLUMNS[@]} -eq 0 ]; then
+    PHI_COLUMNS=("${DEFAULT_PHI_COLUMNS[@]}")
+fi
+
+# =============================================================================
+# Content scanning function for CSV files
+# =============================================================================
+check_csv_headers() {
+    local file="$1"
+
+    # Only check CSV files
+    if [[ ! "$file" == *.csv ]]; then
+        return 0
+    fi
+
+    # Skip if content scanning disabled
+    if [ "$CONTENT_SCANNING_ENABLED" = "false" ]; then
+        return 0
+    fi
+
+    # Skip if file doesn't exist or isn't readable
+    if [ ! -r "$file" ]; then
+        return 0
+    fi
+
+    # Read first line (header)
+    local header
+    header=$(head -1 "$file" 2>/dev/null)
+
+    if [ -z "$header" ]; then
+        return 0
+    fi
+
+    # Build regex pattern from PHI columns
+    local pattern=""
+    for col in "${PHI_COLUMNS[@]}"; do
+        if [ -z "$pattern" ]; then
+            pattern="$col"
+        else
+            pattern="$pattern|$col"
+        fi
+    done
+
+    # Check for PHI columns (case-insensitive)
+    local matches
+    matches=$(echo "$header" | tr ',' '\n' | grep -iE "^($pattern)$" | head -5)
+
+    if [ -n "$matches" ]; then
+        echo "[PHI GUARD] BLOCKED: CSV contains PHI column names"
+        echo "[PHI GUARD] File: $file"
+        echo "[PHI GUARD] Detected columns:"
+        echo "$matches" | while read -r col; do
+            echo "  - $col"
+        done
+        echo "[PHI GUARD] Remove PHI columns or add file to 'project_allowed_patterns' in .claude/phi_config.yaml"
+        return 1
+    fi
+
+    return 0
+}
+
+# =============================================================================
 # Pattern matching
 # =============================================================================
 
 # Check if path matches any allowed pattern first (whitelist)
 for pattern in "${ALLOWED_PATTERNS[@]}"; do
     if [[ "$FILE_PATH" == $pattern ]]; then
+        # Even if path is allowed, check CSV content if it's a CSV file
+        if ! check_csv_headers "$FILE_PATH"; then
+            exit 1
+        fi
         exit 0
     fi
 done
@@ -148,6 +250,11 @@ for pattern in "${PHI_PATTERNS[@]}"; do
         exit 1
     fi
 done
+
+# For paths not explicitly allowed or blocked, check CSV content
+if ! check_csv_headers "$FILE_PATH"; then
+    exit 1
+fi
 
 # Path is safe
 exit 0

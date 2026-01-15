@@ -41,6 +41,12 @@
           "type": "command",
           "command": "if echo \"$TOOL_INPUT\" | grep -q 'Session Log'; then echo '[Hook] Session log updated'; fi",
           "timeout": 2000
+        },
+        {
+          "type": "command",
+          "command": "~/.claude/plugins/research-scientist/scripts/validate_output.sh \"$TOOL_INPUT\"",
+          "timeout": 5000,
+          "description": "PHI Validation: Scans newly written files for potential PHI leakage"
         }
       ]
     },
