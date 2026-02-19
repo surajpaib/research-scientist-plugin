@@ -8,27 +8,7 @@
           "command": "~/.claude/plugins/research-scientist/scripts/phi_guard.sh \"$TOOL_INPUT\"",
           "timeout": 3000,
           "onFailure": "block",
-          "description": "PHI Guard: Blocks access to protected health information"
-        }
-      ]
-    },
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -qE 'cat|head|tail|less|more' && echo \"$TOOL_INPUT\" | grep -qE 'clinical|patient|mrn|\\.nrrd|\\.dcm|/Volumes/'; then echo '[PHI GUARD] WARNING: Potential PHI access via Bash. Use Read tool for proper PHI protection.'; fi",
-          "timeout": 3000
-        }
-      ]
-    },
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -q 'git commit'; then ~/.claude/plugins/research-scientist/scripts/pre_commit_check.sh 2>/dev/null || echo '[Hook] Pre-commit checks found issues'; fi",
-          "timeout": 10000
+          "description": "PHI Guard: Blocks access to protected health information (configure patterns in .claude/phi_config.yaml)"
         }
       ]
     }
@@ -39,24 +19,9 @@
       "hooks": [
         {
           "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -q 'Session Log'; then echo '[Hook] Session log updated'; fi",
-          "timeout": 2000
-        },
-        {
-          "type": "command",
           "command": "~/.claude/plugins/research-scientist/scripts/validate_output.sh \"$TOOL_INPUT\"",
           "timeout": 5000,
           "description": "PHI Validation: Scans newly written files for potential PHI leakage"
-        }
-      ]
-    },
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "if echo \"$TOOL_INPUT\" | grep -qE 'python.*analysis|run-analysis'; then echo '[Hook] Analysis complete - consider updating vault/Home.md'; fi",
-          "timeout": 2000
         }
       ]
     }
