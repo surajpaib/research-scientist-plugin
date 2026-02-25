@@ -1,0 +1,13 @@
+{
+  "name": "arxiv-mcp-server",
+  "version": "1.0.0",
+  "description": "arXiv MCP server for research-scientist plugin — zero npm dependencies, pure Node.js",
+  "main": "index.js",
+  "bin": {
+    "arxiv-mcp-server": "./index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

@@ -1,7 +1,7 @@
 ---
 name: literature-agent
 description: Searches the web for related academic work. Used internally by the writing-agent during /rs:intro to find and format references. Can also be invoked directly for a literature search.
-tools: WebSearch, WebFetch, Read, Write, Edit
+tools: WebSearch, WebFetch, Read, Write, Edit, mcp__arxiv__arxiv_search, mcp__arxiv__arxiv_fetch, mcp__arxiv__arxiv_bibtex, mcp__pubmed__pubmed_search, mcp__pubmed__pubmed_fetch, mcp__pubmed__pubmed_bibtex
 priority: medium
 ---
 
@@ -15,12 +15,12 @@ You search the web for related academic work and format it as BibTeX. You are ca
 
 Search these in order:
 
-| Source | URL pattern | Best for |
+| Source | How to use | Best for |
 |---|---|---|
 | Semantic Scholar | `api.semanticscholar.org/graph/v1/paper/search?query=...` | AI/ML, citation graphs |
-| PubMed | `eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=...` | Biomedical |
+| PubMed MCP | Use `pubmed_search` tool; fetch by PMID/DOI with `pubmed_fetch`; generate BibTeX with `pubmed_bibtex` | Biomedical |
 | OpenAlex | `api.openalex.org/works?search=...` | Broadest coverage |
-| arXiv | `export.arxiv.org/api/query?search_query=all:...` | Preprints / latest |
+| arXiv MCP | Use `arxiv_search` tool; fetch full metadata with `arxiv_fetch`; generate BibTeX with `arxiv_bibtex` | Preprints / latest |
 
 ---
 
@@ -31,6 +31,10 @@ Search these in order:
 From the topic provided, generate 3–4 targeted search strings. Example:
 - Topic: "deep learning for ECG arrhythmia detection"
 - Queries: `"arrhythmia detection deep learning"`, `"ECG classification neural network"`, `"atrial fibrillation AI screening"`
+
+> **arXiv**: Use the `arxiv_search` MCP tool instead of WebFetch. For selected papers, call `arxiv_bibtex` directly to get a ready-to-append BibTeX entry — no manual formatting needed. Use `arxiv_fetch` to retrieve full metadata for a specific paper ID.
+>
+> **PubMed**: Use the `pubmed_search` MCP tool for biomedical papers. Call `pubmed_bibtex` to get a ready-to-append BibTeX entry by PMID or DOI.
 
 ### 2. Search and filter
 

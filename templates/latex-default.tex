@@ -1,0 +1,60 @@
+\documentclass[11pt]{article}
+
+% Generic academic LaTeX template — single-column, preprint/NeurIPS style
+% Pandoc template
+% Usage: pandoc paper.md --natbib --template templates/latex-default.tex -o manuscript.tex
+
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{amsmath,amssymb}
+\usepackage{natbib}
+$if(tables)$
+\usepackage{longtable,booktabs}
+$endif$
+$if(graphics)$
+\usepackage{graphicx}
+$endif$
+
+% ── Title block ──────────────────────────────────────────────────────────────
+$if(title)$
+\title{$title$}
+$endif$
+
+$if(author)$
+\author{%
+$for(author)$
+  $if(author.name)$$author.name$$if(author.affiliation)$\\$author.affiliation$$endif$$if(author.email)$\\$author.email$$endif$$else$$author$$endif$%
+  $sep$ \and
+$endfor$
+}
+$else$
+\author{}
+$endif$
+
+$if(date)$
+\date{$date$}
+$else$
+\date{\today}
+$endif$
+
+% ── Document ─────────────────────────────────────────────────────────────────
+\begin{document}
+
+\maketitle
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$body$
+
+\bibliographystyle{plainnat}
+$if(bibliography)$
+\bibliography{$bibliography$}
+$endif$
+
+\end{document}

@@ -1,350 +1,209 @@
 #!/usr/bin/env node
-
 /**
- * PubMed MCP Server
- *
- * Provides tools for searching PubMed and fetching paper metadata.
- * Uses NCBI E-utilities API with proper rate limiting.
+ * PubMed MCP Server — zero npm dependencies
+ * Uses Node.js built-ins + native fetch (Node 18+)
+ * MCP protocol via JSON-RPC over stdio
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
+const API_KEY = process.env.NCBI_API_KEY || '';
+const DELAY   = API_KEY ? 100 : 340;   // 10 req/s with key, 3 req/s without
 
-const EUTILS_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
-const RATE_LIMIT_MS = 334; // ~3 requests per second without API key
+process.stderr.write(
+  API_KEY
+    ? '[pubmed] API key set — 10 req/s\n'
+    : '[pubmed] No NCBI_API_KEY — 3 req/s (set env var to increase)\n'
+);
 
-let lastRequestTime = 0;
+// ── Rate-limited fetch ────────────────────────────────────────────────────────
 
-async function rateLimitedFetch(url) {
-  const now = Date.now();
-  const elapsed = now - lastRequestTime;
-  if (elapsed < RATE_LIMIT_MS) {
-    await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS - elapsed));
-  }
-  lastRequestTime = Date.now();
-  return fetch(url);
+let lastCall = 0;
+async function apiFetch(url) {
+  const sep = url.includes('?') ? '&' : '?';
+  const full = API_KEY ? `${url}${sep}api_key=${API_KEY}` : url;
+  const wait = DELAY - (Date.now() - lastCall);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  lastCall = Date.now();
+  const res = await fetch(full);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  return res;
 }
 
-async function searchPubMed(query, maxResults = 10, yearStart = null, yearEnd = null) {
-  let searchQuery = query;
+// ── PubMed helpers ────────────────────────────────────────────────────────────
 
-  // Add date filter if specified
-  if (yearStart && yearEnd) {
-    searchQuery += ` AND ${yearStart}:${yearEnd}[dp]`;
-  } else if (yearStart) {
-    searchQuery += ` AND ${yearStart}:3000[dp]`;
-  } else if (yearEnd) {
-    searchQuery += ` AND 1900:${yearEnd}[dp]`;
-  }
+async function search(query, max = 10, yearStart, yearEnd) {
+  let q = query;
+  if (yearStart && yearEnd) q += ` AND ${yearStart}:${yearEnd}[dp]`;
+  else if (yearStart) q += ` AND ${yearStart}:3000[dp]`;
+  else if (yearEnd)   q += ` AND 1900:${yearEnd}[dp]`;
 
-  const searchUrl = `${EUTILS_BASE}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(searchQuery)}&retmax=${maxResults}&retmode=json&sort=relevance`;
+  const url = `${EUTILS}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(q)}&retmax=${Math.min(max,50)}&retmode=json&sort=relevance`;
+  const data = await (await apiFetch(url)).json();
+  const ids = data.esearchresult?.idlist ?? [];
+  if (!ids.length) return { papers: [], total: 0 };
 
-  const searchResponse = await rateLimitedFetch(searchUrl);
-  const searchData = await searchResponse.json();
-
-  if (!searchData.esearchresult?.idlist?.length) {
-    return { papers: [], total: 0 };
-  }
-
-  const ids = searchData.esearchresult.idlist;
-  const total = parseInt(searchData.esearchresult.count) || 0;
-
-  // Fetch details for each ID
-  const fetchUrl = `${EUTILS_BASE}/efetch.fcgi?db=pubmed&id=${ids.join(',')}&retmode=xml`;
-  const fetchResponse = await rateLimitedFetch(fetchUrl);
-  const xmlText = await fetchResponse.text();
-
-  // Parse XML (basic parsing)
-  const papers = parseXmlToPapers(xmlText, ids);
-
-  return { papers, total };
+  const xml = await (await apiFetch(`${EUTILS}/efetch.fcgi?db=pubmed&id=${ids.join(',')}&retmode=xml`)).text();
+  return { papers: parseXml(xml, ids), total: parseInt(data.esearchresult.count) || 0 };
 }
 
-function parseXmlToPapers(xmlText, ids) {
-  const papers = [];
+async function fetchByPmid(pmid) {
+  const xml = await (await apiFetch(`${EUTILS}/efetch.fcgi?db=pubmed&id=${pmid}&retmode=xml`)).text();
+  return parseXml(xml, [pmid])[0] ?? null;
+}
 
-  // Split by article
-  const articles = xmlText.split(/<PubmedArticle>/g).slice(1);
+async function fetchByDoi(doi) {
+  const data = await (await apiFetch(`${EUTILS}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(doi)}[doi]&retmode=json`)).json();
+  const ids = data.esearchresult?.idlist ?? [];
+  return ids.length ? fetchByPmid(ids[0]) : null;
+}
 
-  for (let i = 0; i < articles.length; i++) {
-    const article = articles[i];
+function parseXml(xml, ids) {
+  const unescape = s => s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+  const get = (str, tag) => { const m = str.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`)); return m ? unescape(m[1].trim()) : null; };
 
-    // Extract PMID
-    const pmidMatch = article.match(/<PMID[^>]*>(\d+)<\/PMID>/);
-    const pmid = pmidMatch ? pmidMatch[1] : ids[i];
-
-    // Extract title
-    const titleMatch = article.match(/<ArticleTitle>([^<]+)<\/ArticleTitle>/);
-    const title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : 'Unknown Title';
-
-    // Extract authors
-    const authorMatches = [...article.matchAll(/<LastName>([^<]+)<\/LastName>\s*<ForeName>([^<]+)<\/ForeName>/g)];
-    const authors = authorMatches.map(m => `${m[1]}, ${m[2]}`);
-
-    // Extract journal
-    const journalMatch = article.match(/<Title>([^<]+)<\/Title>/);
-    const journal = journalMatch ? decodeHtmlEntities(journalMatch[1]) : '';
-
-    // Extract year
-    const yearMatch = article.match(/<PubDate>[\s\S]*?<Year>(\d{4})<\/Year>/);
-    const year = yearMatch ? parseInt(yearMatch[1]) : null;
-
-    // Extract DOI
-    const doiMatch = article.match(/<ArticleId IdType="doi">([^<]+)<\/ArticleId>/);
-    const doi = doiMatch ? doiMatch[1] : null;
-
-    // Extract abstract
-    const abstractMatch = article.match(/<AbstractText[^>]*>([^<]+)<\/AbstractText>/);
-    const abstract = abstractMatch ? decodeHtmlEntities(abstractMatch[1]) : '';
-
-    papers.push({
-      pmid,
-      title,
+  return xml.split(/<PubmedArticle>/).slice(1).map((article, i) => {
+    const authors = [...article.matchAll(/<LastName>([^<]+)<\/LastName>\s*<ForeName>([^<]+)<\/ForeName>/g)]
+      .map(m => `${m[1]}, ${m[2]}`);
+    const abs = get(article, 'AbstractText') ?? '';
+    return {
+      pmid:     get(article, 'PMID') ?? ids[i],
+      title:    get(article, 'ArticleTitle') ?? 'Unknown',
       authors,
-      journal,
-      year,
-      doi,
-      abstract: abstract.substring(0, 500) + (abstract.length > 500 ? '...' : ''),
+      journal:  get(article, 'Title') ?? '',
+      year:     (() => { const m = article.match(/<PubDate>[\s\S]*?<Year>(\d{4})<\/Year>/); return m ? parseInt(m[1]) : null; })(),
+      doi:      (() => { const m = article.match(/<ArticleId IdType="doi">([^<]+)<\/ArticleId>/); return m ? m[1] : null; })(),
+      abstract: abs.length > 500 ? abs.slice(0, 500) + '…' : abs,
+    };
+  });
+}
+
+function bibtex(paper) {
+  if (!paper) return null;
+  const first = paper.authors[0]?.split(',')[0]?.toLowerCase().replace(/\s+/g,'') ?? 'unknown';
+  const kw    = paper.title.split(' ').find(w => w.length > 4)?.toLowerCase().replace(/[^a-z]/g,'') ?? 'paper';
+  const key   = `${first}${paper.year ?? 'xxxx'}${kw}`;
+  let bib = `@article{${key},\n`;
+  bib += `  author  = {${paper.authors.join(' and ')}},\n`;
+  bib += `  title   = {${paper.title}},\n`;
+  bib += `  journal = {${paper.journal}},\n`;
+  bib += `  year    = {${paper.year ?? ''}},\n`;
+  if (paper.doi)  bib += `  doi     = {${paper.doi}},\n`;
+  bib += `  pmid    = {${paper.pmid}},\n`;
+  bib += `}\n`;
+  return { key, bibtex: bib };
+}
+
+// ── MCP JSON-RPC server (stdio, no SDK needed) ────────────────────────────────
+
+const TOOLS = [
+  {
+    name: 'pubmed_search',
+    description: 'Search PubMed. Returns title, authors, journal, year, DOI, PMID, abstract.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query:      { type: 'string',  description: 'Search query (PubMed syntax supported)' },
+        max_results:{ type: 'number',  description: 'Max results (default 10, max 50)', default: 10 },
+        year_start: { type: 'number',  description: 'Filter from year' },
+        year_end:   { type: 'number',  description: 'Filter to year' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'pubmed_fetch',
+    description: 'Fetch a single paper by PMID or DOI.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        pmid: { type: 'string', description: 'PubMed ID' },
+        doi:  { type: 'string', description: 'DOI' },
+      },
+    },
+  },
+  {
+    name: 'pubmed_bibtex',
+    description: 'Generate a BibTeX entry for a paper by PMID or DOI.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        pmid: { type: 'string', description: 'PubMed ID' },
+        doi:  { type: 'string', description: 'DOI' },
+      },
+    },
+  },
+];
+
+function ok(id, result) {
+  return JSON.stringify({ jsonrpc: '2.0', id, result });
+}
+
+function err(id, code, message) {
+  return JSON.stringify({ jsonrpc: '2.0', id, error: { code, message } });
+}
+
+async function handle(msg) {
+  const { id, method, params } = msg;
+
+  if (method === 'initialize') {
+    return ok(id, {
+      protocolVersion: '2024-11-05',
+      capabilities: { tools: {} },
+      serverInfo: { name: 'pubmed-server', version: '2.0.0' },
     });
   }
 
-  return papers;
-}
+  if (method === 'notifications/initialized') return null;
 
-function decodeHtmlEntities(text) {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
-
-async function fetchPaperByPmid(pmid) {
-  const fetchUrl = `${EUTILS_BASE}/efetch.fcgi?db=pubmed&id=${pmid}&retmode=xml`;
-  const response = await rateLimitedFetch(fetchUrl);
-  const xmlText = await response.text();
-
-  const papers = parseXmlToPapers(xmlText, [pmid]);
-  return papers[0] || null;
-}
-
-async function fetchPaperByDoi(doi) {
-  // Search PubMed by DOI
-  const searchUrl = `${EUTILS_BASE}/esearch.fcgi?db=pubmed&term=${encodeURIComponent(doi)}[doi]&retmode=json`;
-  const searchResponse = await rateLimitedFetch(searchUrl);
-  const searchData = await searchResponse.json();
-
-  if (!searchData.esearchresult?.idlist?.length) {
-    return null;
+  if (method === 'tools/list') {
+    return ok(id, { tools: TOOLS });
   }
 
-  return fetchPaperByPmid(searchData.esearchresult.idlist[0]);
-}
-
-function generateBibtex(paper) {
-  if (!paper) return null;
-
-  const firstAuthor = paper.authors[0]?.split(',')[0]?.toLowerCase().replace(/\s+/g, '') || 'unknown';
-  const year = paper.year || 'XXXX';
-  const keyword = paper.title.split(' ').find(w => w.length > 4)?.toLowerCase().replace(/[^a-z]/g, '') || 'paper';
-  const key = `${firstAuthor}${year}${keyword}`;
-
-  const authorStr = paper.authors.join(' and ');
-
-  let bibtex = `@article{${key},\n`;
-  bibtex += `  author    = {${authorStr}},\n`;
-  bibtex += `  title     = {${paper.title}},\n`;
-  bibtex += `  journal   = {${paper.journal}},\n`;
-  bibtex += `  year      = {${year}},\n`;
-  if (paper.doi) bibtex += `  doi       = {${paper.doi}},\n`;
-  bibtex += `  pmid      = {${paper.pmid}},\n`;
-  bibtex += `}\n`;
-
-  return { key, bibtex };
-}
-
-// Create server
-const server = new Server(
-  {
-    name: 'pubmed-server',
-    version: '1.0.0',
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
+  if (method === 'tools/call') {
+    const { name, arguments: args = {} } = params;
+    try {
+      let data;
+      if (name === 'pubmed_search') {
+        data = await search(args.query, args.max_results, args.year_start, args.year_end);
+      } else if (name === 'pubmed_fetch') {
+        if (!args.pmid && !args.doi) throw new Error('Provide pmid or doi');
+        data = args.pmid ? await fetchByPmid(args.pmid) : await fetchByDoi(args.doi);
+      } else if (name === 'pubmed_bibtex') {
+        if (!args.pmid && !args.doi) throw new Error('Provide pmid or doi');
+        const paper = args.pmid ? await fetchByPmid(args.pmid) : await fetchByDoi(args.doi);
+        data = bibtex(paper);
+      } else {
+        throw new Error(`Unknown tool: ${name}`);
+      }
+      return ok(id, { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] });
+    } catch (e) {
+      return ok(id, { content: [{ type: 'text', text: `Error: ${e.message}` }], isError: true });
+    }
   }
-);
 
-// List tools
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: 'pubmed_search',
-        description: 'Search PubMed for academic papers. Returns title, authors, journal, year, DOI, PMID, and abstract snippet.',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            query: {
-              type: 'string',
-              description: 'Search query (supports PubMed syntax)',
-            },
-            max_results: {
-              type: 'number',
-              description: 'Maximum results to return (default: 10, max: 50)',
-              default: 10,
-            },
-            year_start: {
-              type: 'number',
-              description: 'Filter by publication year (start)',
-            },
-            year_end: {
-              type: 'number',
-              description: 'Filter by publication year (end)',
-            },
-          },
-          required: ['query'],
-        },
-      },
-      {
-        name: 'pubmed_fetch',
-        description: 'Fetch detailed paper information by PMID or DOI',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            pmid: {
-              type: 'string',
-              description: 'PubMed ID',
-            },
-            doi: {
-              type: 'string',
-              description: 'Digital Object Identifier',
-            },
-          },
-        },
-      },
-      {
-        name: 'pubmed_bibtex',
-        description: 'Generate BibTeX citation for a paper by PMID or DOI',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            pmid: {
-              type: 'string',
-              description: 'PubMed ID',
-            },
-            doi: {
-              type: 'string',
-              description: 'Digital Object Identifier',
-            },
-          },
-        },
-      },
-    ],
-  };
-});
+  return err(id, -32601, `Method not found: ${method}`);
+}
 
-// Handle tool calls
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
+// ── Stdio loop ────────────────────────────────────────────────────────────────
 
-  try {
-    if (name === 'pubmed_search') {
-      const { query, max_results = 10, year_start, year_end } = args;
-      const results = await searchPubMed(query, Math.min(max_results, 50), year_start, year_end);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(results, null, 2),
-          },
-        ],
-      };
+let buf = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', async chunk => {
+  buf += chunk;
+  const lines = buf.split('\n');
+  buf = lines.pop();                     // keep incomplete line
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const msg = JSON.parse(trimmed);
+      const response = await handle(msg);
+      if (response) process.stdout.write(response + '\n');
+    } catch (e) {
+      process.stderr.write(`[pubmed] parse error: ${e.message}\n`);
     }
-
-    if (name === 'pubmed_fetch') {
-      const { pmid, doi } = args;
-      let paper = null;
-
-      if (pmid) {
-        paper = await fetchPaperByPmid(pmid);
-      } else if (doi) {
-        paper = await fetchPaperByDoi(doi);
-      } else {
-        throw new Error('Either pmid or doi must be provided');
-      }
-
-      if (!paper) {
-        return {
-          content: [{ type: 'text', text: 'Paper not found' }],
-        };
-      }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(paper, null, 2),
-          },
-        ],
-      };
-    }
-
-    if (name === 'pubmed_bibtex') {
-      const { pmid, doi } = args;
-      let paper = null;
-
-      if (pmid) {
-        paper = await fetchPaperByPmid(pmid);
-      } else if (doi) {
-        paper = await fetchPaperByDoi(doi);
-      } else {
-        throw new Error('Either pmid or doi must be provided');
-      }
-
-      if (!paper) {
-        return {
-          content: [{ type: 'text', text: 'Paper not found' }],
-        };
-      }
-
-      const result = generateBibtex(paper);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-      };
-    }
-
-    throw new Error(`Unknown tool: ${name}`);
-  } catch (error) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: ${error.message}`,
-        },
-      ],
-      isError: true,
-    };
   }
 });
 
-// Start server
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('PubMed MCP Server running');
-}
-
-main().catch(console.error);
+process.stdin.on('end', () => process.exit(0));
+process.stderr.write('[pubmed] MCP server ready\n');

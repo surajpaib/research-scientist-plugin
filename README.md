@@ -238,6 +238,28 @@ rounded_bar(ax, x=0, height=0.85, color=COLORS["openai"][0])
 
 ---
 
+## PubMed API key
+
+The install script will prompt you for an NCBI API key. Without it PubMed allows 3 req/s; with it you get 10 req/s.
+
+Get a free key at **ncbi.nlm.nih.gov/account** → Settings → API Key Management.
+
+To add or change the key after install, edit `~/.claude/settings.json`:
+
+```json
+"mcpServers": {
+  "pubmed": {
+    "command": "node",
+    "args": ["/path/to/research-scientist/mcp-servers/pubmed-server/index.js"],
+    "env": {
+      "NCBI_API_KEY": "your_key_here"
+    }
+  }
+}
+```
+
+---
+
 ## PHI protection
 
 The PHI Guard hook silently blocks reads to files matching protected patterns. Configure in `.claude/phi_config.yaml`:

@@ -4,6 +4,28 @@ Model Context Protocol (MCP) servers for reliable academic API access.
 
 ## Servers
 
+### arXiv Server
+
+Preprint search and metadata retrieval via the arXiv Atom API. Zero npm dependencies, pure Node.js.
+
+**Tools:**
+- `arxiv_search` — Search arXiv by keyword, category filter (e.g. `cs.LG`, `stat.ML`), and year range
+- `arxiv_fetch` — Fetch full metadata for a single paper by arXiv ID (e.g. `2301.00001`)
+- `arxiv_bibtex` — Generate a ready-to-use BibTeX entry from an arXiv ID
+
+**Setup:**
+Registered automatically by `scripts/install.sh`. No configuration required — the arXiv API is free and unauthenticated.
+
+**Rate limit:** ~3 requests/second (340 ms inter-request delay, polite pool).
+
+**Example:**
+```
+Use arxiv_search with query="contrastive learning ECG" category="cs.LG" year_start=2021
+Use arxiv_bibtex with arxiv_id="2301.00001"
+```
+
+---
+
 ### PubMed Server
 
 Tools for searching PubMed and generating citations.
@@ -58,6 +80,10 @@ Add to your `~/.claude.json`:
     "zotero": {
       "command": "node",
       "args": ["/Users/YOU/.claude/plugins/research-scientist/mcp-servers/zotero-server/index.js"]
+    },
+    "arxiv": {
+      "command": "node",
+      "args": ["/Users/YOU/.claude/plugins/research-scientist/mcp-servers/arxiv-server/index.js"]
     }
   }
 }
@@ -77,6 +103,10 @@ Add to your project's `.mcp.json`:
     "zotero": {
       "command": "node",
       "args": ["~/.claude/plugins/research-scientist/mcp-servers/zotero-server/index.js"]
+    },
+    "arxiv": {
+      "command": "node",
+      "args": ["~/.claude/plugins/research-scientist/mcp-servers/arxiv-server/index.js"]
     }
   }
 }
@@ -99,9 +129,38 @@ Use add_citation to add DOI 10.1016/j.jacc.2023.01.001 to paper/references.bib
 Use list_citations to see what's already in paper/references.bib
 ```
 
+## PubMed API Key (optional but recommended)
+
+Without a key: 3 requests/second. With a key: 10 requests/second.
+
+1. Register free at https://www.ncbi.nlm.nih.gov/account/
+2. Go to **Settings → API Key Management → Create API Key**
+3. Add it to your MCP server config via the `env` field:
+
+```json
+{
+  "mcpServers": {
+    "pubmed": {
+      "command": "node",
+      "args": ["/path/to/mcp-servers/pubmed-server/index.js"],
+      "env": {
+        "NCBI_API_KEY": "your_key_here"
+      }
+    }
+  }
+}
+```
+
+Or export it in your shell before starting Claude:
+```bash
+export NCBI_API_KEY=your_key_here
+claude
+```
+
 ## Rate Limits
 
-- **PubMed**: 3 requests/second without API key (automatic throttling)
+- **arXiv**: ~3 req/s (340 ms throttle, no key required)
+- **PubMed**: 3 req/s without key, 10 req/s with key (automatic throttling)
 - **CrossRef**: Polite pool (no hard limit with User-Agent)
 - **Zotero**: Local, no limits
 

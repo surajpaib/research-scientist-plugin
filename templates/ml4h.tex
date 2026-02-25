@@ -1,0 +1,65 @@
+\documentclass[pmlr,twocolumn,10pt]{jmlr}
+
+% ML4H Workshop — Machine Learning for Health
+% Pandoc template for JMLR/PMLR proceedings format
+% Usage: pandoc paper.md --natbib --template templates/ml4h.tex -o manuscript.tex
+
+$if(title)$
+\jmlrtitle{$title$}
+$endif$
+
+$if(shorttitle)$
+\jmlrheading{$shorttitle$}
+$endif$
+
+\jmlrworkshop{Machine Learning for Health (ML4H) $if(year)$$year$$else$2025$endif$}
+
+% ── Authors ──────────────────────────────────────────────────────────────────
+$if(author)$
+\author{%
+$for(author)$
+  \Name{$author.name$}%
+  $if(author.equal)$\thanks{Equal contribution.}$endif$
+  \Email{$if(author.email)$$author.email$$endif$}\\
+  \addr $if(author.affiliation)$$author.affiliation$$endif$%
+  $sep$ \AND
+$endfor$
+}
+$endif$
+
+% ── Packages ─────────────────────────────────────────────────────────────────
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{amsmath,amssymb}
+$if(tables)$
+\usepackage{longtable,booktabs}
+$endif$
+$if(graphics)$
+\usepackage{graphicx}
+$endif$
+
+% ── Document ─────────────────────────────────────────────────────────────────
+\begin{document}
+
+\maketitle
+
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$if(keywords)$
+\begin{keywords}
+$keywords$
+\end{keywords}
+$endif$
+
+$body$
+
+$if(bibliography)$
+\bibliography{$bibliography$}
+$endif$
+
+\end{document}
